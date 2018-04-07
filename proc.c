@@ -78,6 +78,10 @@ found:
   memset(p->context, 0, sizeof *p->context);
   p->context->eip = (uint)forkret;
 
+#ifdef CS333_P1
+  p->start_ticks = ticks;
+#endif
+
   return p;
 }
 
@@ -495,6 +499,16 @@ static char *states[] = {
   [ZOMBIE]    "zombie"
 };
 
+
+// Helper function to print a floating point looking number
+void
+printelapsed(uint ticks)
+{
+  cprintf("%d", ticks/1000);
+  cprintf(".%d\t", ticks - (ticks/1000) * 1000);
+}
+
+
 //PAGEBREAK: 36
 // Print a process listing to console.  For debugging.
 // Runs when user types ^P on console.
@@ -507,6 +521,9 @@ procdump(void)
   char *state;
   uint pc[10];
 
+  // Print the header before looping into process printing
+  cprintf("\nPID\tState\tName\tElapsed\t PCs\n");
+
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if(p->state == UNUSED)
       continue;
@@ -514,11 +531,17 @@ procdump(void)
       state = states[p->state];
     else
       state = "???";
-    cprintf("%d %s %s", p->pid, state, p->name);
+
+    // remove old print statement
+    //cprintf("%d %s %s", p->pid, state, p->name);
+    cprintf("%d\t%s\t%s\t", p->pid, state, p->name);
+    // call helper funciton to print elapsed time
+    printelapsed(p->start_ticks);
+
     if(p->state == SLEEPING){
       getcallerpcs((uint*)p->context->ebp+2, pc);
       for(i=0; i<10 && pc[i] != 0; i++)
-        cprintf(" %p", pc[i]);
+      cprintf(" %p", pc[i]);
     }
     cprintf("\n");
   }

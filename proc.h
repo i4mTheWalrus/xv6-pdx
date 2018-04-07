@@ -14,7 +14,6 @@ struct cpu {
   // Cpu-local storage variables; see below
   struct cpu *cpu;
   struct proc *proc;           // The currently-running process.
-
 };
 
 extern struct cpu cpus[NCPU];

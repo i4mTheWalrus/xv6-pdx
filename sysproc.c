@@ -103,6 +103,6 @@ sys_date(void)
     return -1;
   else
     cmostime(d);
-    return 0;
+  return 0;
 }
 #endif

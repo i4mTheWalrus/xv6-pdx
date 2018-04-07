@@ -50,6 +50,7 @@ allocproc(void)
     if(p->state == UNUSED)
       goto found;
   release(&ptable.lock);
+
   return 0;
 
 found:
@@ -501,7 +502,7 @@ static char *states[] = {
 
 
 // Helper function to print a floating point looking number
-void
+static void
 printelapsed(uint ticks)
 {
   cprintf("%d", ticks/1000);

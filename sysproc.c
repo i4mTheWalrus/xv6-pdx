@@ -93,6 +93,7 @@ sys_halt(void){
   return 0;
 }
 
+#ifdef CS333_P1
 // Project 1 Implementation of the date() system call
 int
 sys_date(void)
@@ -104,3 +105,4 @@ sys_date(void)
     cmostime(d);
     return 0;
 }
+#endif

@@ -79,9 +79,9 @@ found:
   memset(p->context, 0, sizeof *p->context);
   p->context->eip = (uint)forkret;
 
-#ifdef CS333_P1
+  // CS333_P1
+  // ADDED TO HELP DISPLAY ELAPSED PROCESS TIME
   p->start_ticks = ticks;
-#endif
 
   return p;
 }
@@ -501,6 +501,7 @@ static char *states[] = {
 };
 
 
+// CS333_P1
 // Helper function to print a floating point looking number
 static void
 printelapsed(uint ticks)
@@ -537,7 +538,7 @@ procdump(void)
     //cprintf("%d %s %s", p->pid, state, p->name);
     cprintf("%d\t%s\t%s\t", p->pid, state, p->name);
     // call helper funciton to print elapsed time
-    printelapsed(p->start_ticks);
+    printelapsed(ticks - p->start_ticks);
 
     if(p->state == SLEEPING){
       getcallerpcs((uint*)p->context->ebp+2, pc);

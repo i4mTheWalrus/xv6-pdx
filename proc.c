@@ -79,9 +79,9 @@ found:
   memset(p->context, 0, sizeof *p->context);
   p->context->eip = (uint)forkret;
 
-  // CS333_P1
-  // ADDED TO HELP DISPLAY ELAPSED PROCESS TIME
+#ifdef CS333_P1
   p->start_ticks = ticks;
+#endif
 
   return p;
 }
@@ -553,7 +553,7 @@ procdump(void)
 #if defined(CS333_P3P4)
   procdumpP3P4(p, state);
 #elif defined(CS333_P2)
-  procdumpP2(p, state);
+  procdumpP1(p, state);
 #elif defined(CS333_P1)
   procdumpP1(p, state);
 #else

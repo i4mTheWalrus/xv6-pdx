@@ -25,3 +25,4 @@
 #define SYS_date    SYS_halt+1
 #define SYS_getuid  SYS_date+1
 #define SYS_getgid  SYS_getuid+1
+#define SYS_getppid SYS_getgid+1

@@ -118,4 +118,10 @@ sys_getgid(void)
 {
   return proc->gid;
 }
+
+uint
+sys_getppid(void)
+{
+  return proc->parent->pid;
+}
 #endif

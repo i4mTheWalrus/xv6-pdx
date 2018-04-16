@@ -128,14 +128,30 @@ sys_getppid(void)
 int
 sys_setuid(void)
 {
-  // get arg off the stack
-  return 0;
+  int id;
+  if(argint(0, &id) < 0)
+    return -1; // argint failed to fetch off the stack
+  if(id < 0 || id > 32768)
+    return -1; // id is outside of acceptale range
+  else
+  {
+    proc->uid = id;
+    return id;
+  }
 }
 
 int
 sys_setgid(void)
 {
-  // get arg off the stack
-  return 0;
+  int id;
+  if(argint(0, &id) < 0)
+    return -1; // argint failed to fetch off the stack
+  if(id < 0 || id > 32768)
+    return -1; // id is outside of acceptale range
+  else
+  {
+    proc->gid = id;
+    return id;
+  }
 }
 #endif

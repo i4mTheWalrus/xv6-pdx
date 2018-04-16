@@ -83,6 +83,12 @@ found:
   p->start_ticks = ticks;
 #endif
 
+#ifdef CS333_P2
+  // Initialize gid and uid values
+  p->uid = 33;
+  p->gid = 66;
+#endif
+
   return p;
 }
 

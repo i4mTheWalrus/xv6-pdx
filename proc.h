@@ -71,6 +71,7 @@ struct proc {
 #endif
 #ifdef CS333_P2
   uint uid;            // User ID
+  uint gid;            // Group ID
 #endif
 };
 

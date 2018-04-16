@@ -106,3 +106,16 @@ sys_date(void)
   return 0;
 }
 #endif
+#ifdef CS333_P2
+uint
+sys_getuid(void)
+{
+  int *p;
+  if(argptr(0, (void*)&p, sizeof(int)) < 0)
+    return 0;
+  if(*p < 0)
+    return 0;
+  else
+    return (uint)*p;
+}
+#endif

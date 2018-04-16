@@ -2,7 +2,7 @@
 # 0 == original xv6-pdx distribution functionality
 CS333_PROJECT ?= 2
 CS333_CFLAGS =
-CS333_UPROGS = _getuid _getgid _getppid
+CS333_UPROGS =
 CS333_TPROGS =
 PRINT_SYSCALLS ?= 0
 

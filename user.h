@@ -31,6 +31,8 @@ int date(struct rtcdate*);
 uint getuid(void);
 uint getgid(void);
 uint getppid(void);
+int setuid(uint);
+int setgid(uint);
 #endif
 
 // ulib.c

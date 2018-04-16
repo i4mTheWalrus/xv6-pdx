@@ -107,21 +107,35 @@ sys_date(void)
 }
 #endif
 #ifdef CS333_P2
-uint
+int
 sys_getuid(void)
 {
   return proc->uid;
 }
 
-uint
+int
 sys_getgid(void)
 {
   return proc->gid;
 }
 
-uint
+int
 sys_getppid(void)
 {
   return proc->parent->pid;
+}
+
+int
+sys_setuid(void)
+{
+  // get arg off the stack
+  return 0;
+}
+
+int
+sys_setgid(void)
+{
+  // get arg off the stack
+  return 0;
 }
 #endif

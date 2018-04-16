@@ -83,12 +83,6 @@ found:
   p->start_ticks = ticks;
 #endif
 
-#ifdef CS333_P2
-  // Initialize gid and uid values
-  p->uid = 33;
-  p->gid = 66;
-#endif
-
   return p;
 }
 
@@ -117,6 +111,12 @@ userinit(void)
 
   safestrcpy(p->name, "initcode", sizeof(p->name));
   p->cwd = namei("/");
+
+#ifdef CS333_P2
+  // Initialize gid and uid values
+  p->uid = STARTUID;
+  p->gid = STARTGID;
+#endif
 
   p->state = RUNNABLE;
 }
@@ -181,6 +181,13 @@ fork(void)
   acquire(&ptable.lock);
   np->state = RUNNABLE;
   release(&ptable.lock);
+
+#ifdef CS333_P2
+  // Initialize gid and uid values
+  np->uid = np->parent->uid;
+  np->gid = np->parent->gid;
+#endif
+
 
   return pid;
 }

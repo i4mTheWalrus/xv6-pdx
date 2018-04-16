@@ -112,4 +112,10 @@ sys_getuid(void)
 {
   return proc->uid;
 }
+
+uint
+sys_getgid(void)
+{
+  return proc->gid;
+}
 #endif

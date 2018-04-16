@@ -29,6 +29,7 @@ int date(struct rtcdate*);
 #endif
 #ifdef CS333_P2
 uint getuid(void);
+uint getgid(void);
 #endif
 
 // ulib.c

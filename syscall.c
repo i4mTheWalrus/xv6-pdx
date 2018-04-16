@@ -104,6 +104,7 @@ extern int sys_date(void);
 #endif
 #ifdef CS333_P2
 extern int sys_getuid(void);
+extern int sys_getgid(void);
 #endif
 
 static int (*syscalls[])(void) = {
@@ -134,6 +135,7 @@ static int (*syscalls[])(void) = {
 #endif
 #ifdef CS333_P2
 [SYS_getuid]  sys_getuid,
+[SYS_getgid]  sys_getgid,
 #endif
 };
 
@@ -164,6 +166,7 @@ static char (*syscallnames[]) = {
 [SYS_halt]    "halt",
 [SYS_date]    "date",
 [SYS_getuid]  "getuid",
+[SYS_getgid]  "getgid",
 };
 #endif
 

@@ -24,3 +24,4 @@
 // student system calls begin here. Follow the existing pattern.
 #define SYS_date    SYS_halt+1
 #define SYS_getuid  SYS_date+1
+#define SYS_getgid  SYS_getuid+1

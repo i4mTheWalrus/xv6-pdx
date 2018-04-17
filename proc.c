@@ -82,6 +82,10 @@ found:
 #ifdef CS333_P1
   p->start_ticks = ticks;
 #endif
+#ifdef CS333_P2
+  p->cpu_ticks_total = 0;
+  p->cpu_ticks_in = 0;
+#endif
 
   return p;
 }
@@ -333,7 +337,9 @@ scheduler(void)
       p->state = RUNNING;
       swtch(&cpu->scheduler, proc->context);
       switchkvm();
-
+#ifdef CS333_P2
+      p->cpu_ticks_in = ticks;
+#endif
       // Process is done running for now.
       // It should have changed its p->state before coming back.
       proc = 0;
@@ -371,6 +377,9 @@ sched(void)
   if(readeflags()&FL_IF)
     panic("sched interruptible");
   intena = cpu->intena;
+#ifdef CS333_P2
+  proc->cpu_ticks_total = ticks - proc->cpu_ticks_in;
+#endif
   swtch(&proc->context, cpu->scheduler);
   cpu->intena = intena;
 }
@@ -519,7 +528,7 @@ static void
 printelapsed(uint ticks)
 {
   cprintf("%d", ticks/1000);
-  cprintf(".%d\t", ticks - (ticks/1000) * 1000);
+  cprintf(".%d", ticks % 1000);
 }
 
 void
@@ -528,6 +537,23 @@ procdumpP1(struct proc *p, char *state)
   cprintf("%d\t%s\t", p->pid, p->name);
   printelapsed(ticks - p->start_ticks);
   cprintf("%s\t", state);
+}
+#endif
+
+#ifdef CS333_P2
+void
+procdumpP2(struct proc *p, char *state)
+{
+  cprintf("%d\t%s\t%d\t%d\t", p->pid, p->name, p->uid, p->gid);
+  if(p->pid == 1)
+    cprintf("1\t");
+  else
+    cprintf("%d\t", p->parent->pid);
+  printelapsed(ticks - p->start_ticks);
+  cprintf("%s\t", "");
+  printelapsed(p->cpu_ticks_total);
+  cprintf("\t%s\t", state);
+
 }
 #endif
 
@@ -566,7 +592,7 @@ procdump(void)
 #if defined(CS333_P3P4)
   procdumpP3P4(p, state);
 #elif defined(CS333_P2)
-  procdumpP1(p, state);
+  procdumpP2(p, state);
 #elif defined(CS333_P1)
   procdumpP1(p, state);
 #else

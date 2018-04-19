@@ -77,6 +77,11 @@ struct proc {
 #endif
 };
 
+#ifdef CS333_P2
+#include "uproc.h"
+int filluprocs(uint max, struct uproc **uptable);
+#endif
+
 // Process memory is laid out contiguously, low addresses first:
 //   text
 //   original data and bss

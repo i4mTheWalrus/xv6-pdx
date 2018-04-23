@@ -25,7 +25,7 @@
 #define SYS_date    SYS_halt+1
 #define SYS_getuid  SYS_date+1
 #define SYS_getgid  SYS_getuid+1
-#define SYS_getppid SYS_getgid+1
-#define SYS_setuid  SYS_getppid+1
+#define SYS_setuid  SYS_getgid+1
 #define SYS_setgid  SYS_setuid+1
-#define SYS_getprocs SYS_setgid+1
+#define SYS_getppid SYS_setgid+1
+#define SYS_getprocs SYS_getppid+1

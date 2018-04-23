@@ -6,9 +6,6 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
-#ifdef CS333_P2
-//#include "uproc.h"
-#endif
 
 struct {
   struct spinlock lock;
@@ -195,7 +192,6 @@ fork(void)
   np->gid = np->parent->gid;
 #endif
 
-
   return pid;
 }
 
@@ -331,6 +327,9 @@ scheduler(void)
       if(p->state != RUNNABLE)
         continue;
 
+#ifdef CS333_P2
+      p->cpu_ticks_in = ticks;
+#endif
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
@@ -340,9 +339,7 @@ scheduler(void)
       p->state = RUNNING;
       swtch(&cpu->scheduler, proc->context);
       switchkvm();
-#ifdef CS333_P2
-      p->cpu_ticks_in = ticks;
-#endif
+
       // Process is done running for now.
       // It should have changed its p->state before coming back.
       proc = 0;
@@ -370,7 +367,6 @@ void
 sched(void)
 {
   int intena;
-
   if(!holding(&ptable.lock))
     panic("sched ptable.lock");
   if(cpu->ncli != 1)
@@ -380,9 +376,11 @@ sched(void)
   if(readeflags()&FL_IF)
     panic("sched interruptible");
   intena = cpu->intena;
+
 #ifdef CS333_P2
-  proc->cpu_ticks_total = ticks - proc->cpu_ticks_in;
+  proc->cpu_ticks_total += (ticks - proc->cpu_ticks_in);
 #endif
+
   swtch(&proc->context, cpu->scheduler);
   cpu->intena = intena;
 }
@@ -563,6 +561,8 @@ procdumpP2(struct proc *p, char *state)
 // Print a process listing to console.  For debugging.
 // Runs when user types ^P on console.
 // No lock to avoid wedging a stuck machine further.
+
+// Note code obtained from Mark Morrissey at PSU
 void
 procdump(void)
 {
@@ -744,6 +744,6 @@ filluprocs(uint max, struct uproc **uptable)
     }
   }
   release(&ptable.lock);
-  return upnum;
+  return upnum; // return number of uprocs copied into uptable
 }
 #endif

@@ -30,9 +30,9 @@ int date(struct rtcdate*);
 #ifdef CS333_P2
 uint getuid(void);
 uint getgid(void);
-uint getppid(void);
 int setuid(uint);
 int setgid(uint);
+uint getppid(void);
 int getprocs(uint, ...);
 #endif
 

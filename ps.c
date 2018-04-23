@@ -9,8 +9,15 @@ static uint MAX_UPROCS = 16; // maximum number of entries in urpoc table
 static void
 printelapsed(uint ticks)
 {
-  printf(1, "%d", ticks/1000);
-  printf(1, ".%d", ticks % 1000);
+  if(ticks >= 1000)
+  {
+    printf(1, "%d", ticks/1000);
+    printf(1, ".%d", ticks % 1000);
+  }
+  else {
+    printf(1, "%d", ticks/100);
+    printf(1, ".%d", ticks % 100);
+  }
 }
 
 int
@@ -46,6 +53,7 @@ main(void)
     printf(1, "\t%s\t%d\t\n", uptable[i]->state, uptable[i]->size);
   }
 
+  free(uptable);
   exit();
 }
 #endif

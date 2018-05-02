@@ -122,7 +122,7 @@ sys_getgid(void)
 int
 sys_getppid(void)
 {
-  if(proc->parent != 0)
+  if(proc->parent)
     return proc->parent->pid;
   else
     return -1;
@@ -134,12 +134,12 @@ sys_setuid(void)
   int id;
   if(argint(0, &id) < 0)
     return -1; // argint failed to fetch off the stack
-  if(id < 0 || id > 32768)
+  if(id <= 0 || id > 32768)
     return -1; // id is outside of acceptale range
   else
   {
     proc->uid = id;
-    return id;
+    return 0;
   }
 }
 
@@ -149,12 +149,12 @@ sys_setgid(void)
   int id;
   if(argint(0, &id) < 0)
     return -1; // argint failed to fetch off the stack
-  if(id < 0 || id > 32768)
+  if(id <= 0 || id > 32768)
     return -1; // id is outside of acceptale range
   else
   {
     proc->gid = id;
-    return id;
+    return 0;
   }
 }
 

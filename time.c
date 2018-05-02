@@ -18,41 +18,34 @@ main(int argc, char *argv[])
   int ticks_in = 0, ticks_out = 0;
   int pid;
 
-  // only move ahead if there are args
-  if(argc > 1)
-  {
-    ticks_in = uptime(); // mark when entering cpu
+  ticks_in = uptime(); // mark when entering cpu
 
-    pid = fork();
-    if(pid > 0) {
-      // PARENT PROCESS
-      pid = wait();
-      printf(1, "%s ran in ", argv[1]);
-      printelapsed(ticks_out);
-      printf(1, " seconds.\n");
-    } else if (pid == 0) {
-      // CHILD PROCESS
-      // copy the arg list into a new one to execute with
-      char** newargs = malloc(sizeof(*newargs) * (argc+1));
-      for(int i = 0; i < argc; i++) // allocate memory
-      {
-        newargs[i] = malloc(MAX_CHARS);
-        newargs[i] = argv[i+2];
-      }
-      newargs[argc] = 0;
-      exec(argv[1], newargs);
-    } else {
-      printf(2, "fork error\n");
+  pid = fork();
+
+  if(pid > 0) {
+    wait();
+  } else if(pid == 0) {
+    char* args[argc-1];
+    for(int i = 0; i < argc; i++) {
+      args[i] = malloc(sizeof(argv[i+1]));
+      args[i] = argv[i+1];
     }
-    // mark when leaving the cpu
-    ticks_out = uptime() - ticks_in;
+    exec(args[0], args);
+  } else {
+    printf(2, "fork error.");
   }
-  else { // time was called without an arg
+
+  ticks_out = uptime() - ticks_in;
+
+  if(argc <= 1) {
     printf(1, " ran in ");
     printelapsed(ticks_out);
     printf(1, " seconds.\n");
+  } else {
+    printf(1, "%s ran in ", argv[1]);
+    printelapsed(ticks_out);
+    printf(1, " seconds.\n");
   }
-
   exit();
 }
 

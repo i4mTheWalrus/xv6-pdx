@@ -181,16 +181,18 @@ fork(void)
 
   pid = np->pid;
 
+#ifdef CS333_P2
+  // Initialize gid and uid values
+  if(np->parent) {
+    np->uid = np->parent->uid;
+    np->gid = np->parent->gid;
+  }
+#endif
+
   // lock to force the compiler to emit the np->state write last.
   acquire(&ptable.lock);
   np->state = RUNNABLE;
   release(&ptable.lock);
-
-#ifdef CS333_P2
-  // Initialize gid and uid values
-  np->uid = np->parent->uid;
-  np->gid = np->parent->gid;
-#endif
 
   return pid;
 }
@@ -714,7 +716,7 @@ filluprocs(uint max, struct uproc **uptable)
 
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
   {
-    if(i < max)
+    if(i < max && p)
     {
       switch(p->state) // check if this proc should be copied
       {

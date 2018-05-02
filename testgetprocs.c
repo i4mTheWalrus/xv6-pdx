@@ -5,17 +5,21 @@
 int
 main(int argc, char *argv[])
 {
+
   int pid;
+for(int i = 0; i < 10; i++) {
   pid = fork();
   if(pid > 0) {
     // parent process
     pid = wait();
   } else if (pid == 0) {
-    // child process
-    exec(argv[1], argv);
+    // child proces
+    printf(1, "im child\n");
+    sleep(2000);
   } else {
     printf(2, "fork error\n");
   }
+}
   exit();
 }
 #endif

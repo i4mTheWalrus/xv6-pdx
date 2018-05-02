@@ -91,3 +91,7 @@ p5-test.h
 testsetuid.c
 testSched.c
 getuid.c
+testuidgid.c
+testtime.c
+uproc.h
+ps-test.c

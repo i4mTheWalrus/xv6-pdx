@@ -7,10 +7,34 @@
 #include "proc.h"
 #include "spinlock.h"
 
+#ifdef CS333_P3P4
+struct StateLists {
+  struct proc* ready;
+  struct proc* readyTail;
+  struct proc* free;
+  struct proc* freeTail;
+  struct proc* sleep;
+  struct proc* sleepTail;
+  struct proc* zombie;
+  struct proc* zombieTail;
+  struct proc* running;
+  struct proc* runningTail;
+  struct proc* embryo;
+  struct proc* embryoTail;
+};
+
+struct {
+  struct spinlock lock;
+  struct proc proc [NPROC];
+  struct StateLists pLists;
+} ptable ;
+
+#else
 struct {
   struct spinlock lock;
   struct proc proc[NPROC];
 } ptable;
+#endif
 
 static struct proc *initproc;
 
@@ -97,6 +121,13 @@ userinit(void)
 {
   struct proc *p;
   extern char _binary_initcode_start[], _binary_initcode_size[];
+
+#ifdef CS333_P3P4
+  acquire(&ptable.lock);
+  initProcessLists();
+  initFreeList();
+  release(&ptable.lock);
+#endif
 
   p = allocproc();
   initproc = p;
@@ -359,7 +390,44 @@ scheduler(void)
 void
 scheduler(void)
 {
+  struct proc *p;
+  int idle;  // for checking if processor is idle
 
+  for(;;){
+    // Enable interrupts on this processor.
+    sti();
+
+    idle = 1;  // assume idle unless we schedule a process
+    // Loop over process table looking for process to run.
+    acquire(&ptable.lock);
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+      if(p->state != RUNNABLE)
+        continue;
+
+#ifdef CS333_P2
+      p->cpu_ticks_in = ticks;
+#endif
+      // Switch to chosen process.  It is the process's job
+      // to release ptable.lock and then reacquire it
+      // before jumping back to us.
+      idle = 0;  // not idle this timeslice
+      proc = p;
+      switchuvm(p);
+      p->state = RUNNING;
+      swtch(&cpu->scheduler, proc->context);
+      switchkvm();
+
+      // Process is done running for now.
+      // It should have changed its p->state before coming back.
+      proc = 0;
+    }
+    release(&ptable.lock);
+    // if idle, wait for next interrupt
+    if (idle) {
+      sti();
+      hlt();
+    }
+  }
 }
 #endif
 
@@ -546,6 +614,22 @@ procdumpP1(struct proc *p, char *state)
 #ifdef CS333_P2
 void
 procdumpP2(struct proc *p, char *state)
+{
+  cprintf("%d\t%s\t%d\t%d\t", p->pid, p->name, p->uid, p->gid);
+  if(p->pid == 1)
+    cprintf("1\t");
+  else
+    cprintf("%d\t", p->parent->pid);
+  printelapsed(ticks - p->start_ticks);
+  cprintf("%s\t", "");
+  printelapsed(p->cpu_ticks_total);
+  cprintf("\t%s\t%d\t", state, p->sz);
+}
+#endif
+
+#ifdef CS333_P3P4
+void
+procdumpP3P4(struct proc *p, char *state)
 {
   cprintf("%d\t%s\t%d\t%d\t", p->pid, p->name, p->uid, p->gid);
   if(p->pid == 1)

@@ -85,6 +85,11 @@ struct proc {
 int filluprocs(uint max, struct uproc **uptable);
 #endif
 
+#ifdef CS333_P3P4
+void readydump(void);
+void freedump(void);
+#endif
+
 // Process memory is laid out contiguously, low addresses first:
 //   text
 //   original data and bss

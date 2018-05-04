@@ -69,6 +69,16 @@ allocproc(void)
   struct proc *p;
   char *sp;
 
+#ifdef CS333_P3P4
+  acquire(&ptable.lock);
+  p = ptable.pLists.free; // set p to first node in free list
+  if(p)
+    goto found;
+
+  release(&ptable.lock);
+  return 0;
+#endif
+
   acquire(&ptable.lock);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
     if(p->state == UNUSED)
@@ -78,9 +88,17 @@ allocproc(void)
   return 0;
 
 found:
+#ifdef CS333_P3P4
+  p->state = EMBRYO;
+  p->pid = nextpid++;
+  stateListRemove(&ptable.pLists.free, &ptable.pLists.freeTail, p);
+  stateListAdd(&ptable.pLists.embryo, &ptable.pLists.embryoTail, p);
+  release(&ptable.lock);
+#else
   p->state = EMBRYO;
   p->pid = nextpid++;
   release(&ptable.lock);
+#endif
 
   // Allocate kernel stack.
   if((p->kstack = kalloc()) == 0){
@@ -920,5 +938,34 @@ filluprocs(uint max, struct uproc **uptable)
   }
   release(&ptable.lock);
   return upnum; // return number of uprocs copied into uptable
+}
+#endif
+#ifdef CS333_P3P4
+void
+readydump(void)
+{
+  struct proc *p;
+  p = ptable.pLists.ready;
+  while(p) {
+    cprintf("%d->", p->pid);
+    p = p->next;
+  }
+  cprintf("\n");
+}
+
+void
+freedump(void)
+{
+  struct proc *p;
+  int count = 0;
+  acquire(&ptable.lock);
+  p = ptable.pLists.free;
+  while(p) {
+    count++;
+    p = p->next;
+  }
+  release(&ptable.lock);
+
+  cprintf("%d\n", count);
 }
 #endif

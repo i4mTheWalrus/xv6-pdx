@@ -107,7 +107,7 @@ panic(char *s)
 {
   int i;
   uint pcs[10];
-  
+
   cli();
   cons.locking = 0;
   cprintf("cpu%d: panic: ", cpu->id);
@@ -130,7 +130,7 @@ static void
 cgaputc(int c)
 {
   int pos;
-  
+
   // Cursor position: col + 80*row.
   outb(CRTPORT, 14);
   pos = inb(CRTPORT+1) << 8;
@@ -146,13 +146,13 @@ cgaputc(int c)
 
   if(pos < 0 || pos > 25*80)
     panic("pos under/overflow");
-  
+
   if((pos/80) >= 24){  // Scroll up.
     memmove(crt, crt+80, sizeof(crt[0])*23*80);
     pos -= 80;
     memset(crt+pos, 0, sizeof(crt[0])*(24*80 - pos));
   }
-  
+
   outb(CRTPORT, 14);
   outb(CRTPORT+1, pos>>8);
   outb(CRTPORT, 15);
@@ -190,6 +190,9 @@ void
 consoleintr(int (*getc)(void))
 {
   int c, doprocdump = 0;
+#ifdef CS333_P3P4
+  int doreadydump = 0, dofreedump = 0;
+#endif
 
   acquire(&cons.lock);
   while((c = getc()) >= 0){
@@ -210,6 +213,15 @@ consoleintr(int (*getc)(void))
         consputc(BACKSPACE);
       }
       break;
+#ifdef CS333_P3P4
+    case C('R'):
+      doreadydump = 1;
+      break;
+    case C('F'):
+      dofreedump = 1;
+      break;
+#endif
+
     default:
       if(c != 0 && input.e-input.r < INPUT_BUF){
         c = (c == '\r') ? '\n' : c;
@@ -227,6 +239,14 @@ consoleintr(int (*getc)(void))
   if(doprocdump) {
     procdump();  // now call procdump() wo. cons.lock held
   }
+#ifdef CS333_P3P4
+  if(doreadydump) {
+    readydump();
+  }
+  if(dofreedump) {
+    freedump();
+  }
+#endif
 }
 
 int

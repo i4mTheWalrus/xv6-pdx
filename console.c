@@ -191,7 +191,7 @@ consoleintr(int (*getc)(void))
 {
   int c, doprocdump = 0;
 #ifdef CS333_P3P4
-  int doreadydump = 0, dofreedump = 0;
+  int doreadydump = 0, dofreedump = 0, dosleepingdump = 0, dozombiedump = 0;
 #endif
 
   acquire(&cons.lock);
@@ -220,6 +220,12 @@ consoleintr(int (*getc)(void))
     case C('F'):
       dofreedump = 1;
       break;
+    case C('S'):
+      dosleepingdump = 1;
+      break;
+    case C('Z'):
+      dozombiedump = 1;
+      break;
 #endif
 
     default:
@@ -245,6 +251,12 @@ consoleintr(int (*getc)(void))
   }
   if(dofreedump) {
     freedump();
+  }
+  if(dosleepingdump) {
+    sleepingdump();
+  }
+  if(dozombiedump) {
+    zombiedump();
   }
 #endif
 }

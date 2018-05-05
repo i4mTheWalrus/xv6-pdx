@@ -88,6 +88,8 @@ int filluprocs(uint max, struct uproc **uptable);
 #ifdef CS333_P3P4
 void readydump(void);
 void freedump(void);
+void sleepingdump(void);
+void zombiedump(void);
 #endif
 
 // Process memory is laid out contiguously, low addresses first:

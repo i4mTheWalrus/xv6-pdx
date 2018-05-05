@@ -3,7 +3,7 @@
 #include "user.h"
 #include "uproc.h"
 
-static uint MAX_UPROCS = 16; // maximum number of entries in urpoc table
+static uint MAX_UPROCS = 16; // maximum number of entries in uproc table
 
 // Helper function to print a floating point looking number
 static void
@@ -51,6 +51,11 @@ main(void)
     printf(1, "\t");
     printelapsed(uptable[i]->CPU_total_ticks);
     printf(1, "\t%s\t%d\t\n", uptable[i]->state, uptable[i]->size);
+  }
+
+  for(int i = 0; i < MAX_UPROCS; i++)
+  {
+    free(uptable[i]);
   }
 
   free(uptable);

@@ -44,7 +44,6 @@ extern void trapret(void);
 
 static void wakeup1(void *chan);
 
-
 #ifdef CS333_P3P4
 static void initProcessLists(void);
 static void initFreeList(void);
@@ -198,6 +197,14 @@ userinit(void)
   p->state = RUNNABLE;
   p->next = 0;
   stateListAdd(&ptable.pLists.ready, &ptable.pLists.readyTail, p);
+  ptable.pLists.sleep = 0;
+  ptable.pLists.sleepTail = 0;
+  ptable.pLists.zombie = 0;
+  ptable.pLists.zombieTail = 0;
+  ptable.pLists.running = 0;
+  ptable.pLists.runningTail = 0;
+  ptable.pLists.embryo = 0;
+  ptable.pLists.embryoTail = 0;
   release(&ptable.lock);
 #else
   p->state = RUNNABLE;
@@ -486,7 +493,8 @@ wait(void) // P3 wait **************************
 
       p = p->next;
     }
-
+    // Look through other lists for children
+    // (mirroring prior implementation)
     p = ptable.pLists.ready;
     while(p) {
       if(p->parent == proc) {
@@ -813,6 +821,8 @@ kill(int pid) // ****** P3 ***********************
 {
   struct proc *p;
 
+  acquire(&ptable.lock);
+
   if((p = ptable.pLists.sleep)) {
     while(p) {
       if(p->pid == pid){
@@ -840,6 +850,17 @@ kill(int pid) // ****** P3 ***********************
   }
 
   if((p = ptable.pLists.running)) {
+    while(p) {
+      if(p->pid == pid) {
+        p->killed = 1;
+        release(&ptable.lock);
+        return 0;
+      }
+      p = p->next;
+    }
+  }
+
+  if((p = ptable.pLists.embryo)) {
     while(p) {
       if(p->pid == pid) {
         p->killed = 1;

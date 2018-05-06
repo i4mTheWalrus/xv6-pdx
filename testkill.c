@@ -10,15 +10,17 @@ main(int argc, char *argv[])
   pid = fork();
   if(pid > 0) {
     // parent process
+    sleep(100);
     printf(1, "parent sleeping for 3 seconds\n");
-    sleep(3000);
+    sleep(4000);
     printf(1, "parent attempting to kill child\n");
     kill(pid);
-    printf(1, "done.\n");
+    printf(1, "done. Check zombie list\n");
+    sleep(2000);
   } else if (pid == 0) {
     // child proces
     printf(1, "Child sleeping for 5 seconds\n");
-    sleep(5000);
+    sleep(7000);
     printf(1, "Child exiting, wasn't killed.\n");
     exit();
   } else {

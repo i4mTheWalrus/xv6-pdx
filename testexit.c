@@ -5,29 +5,22 @@
 int
 main(int argc, char *argv[])
 {
-/*
-  p = allocproc();
-  printf(1, "allocated p");
-  sleep(5000);
-*/
 
-
-/*
   int pid;
   pid = fork();
   if(pid > 0) {
     // parent process
-    printf(1, "parent\n");
-    wait();
+    sleep(100);
+    printf(1, "parent sleeping for 3 seconds\n");
+    sleep(4000);
   } else if (pid == 0) {
     // child proces
-    sleep(100);
-    printf(1, "child\n");
+    printf(1, "Child exiting, parent still waiting.\n");
     exit();
   } else {
     printf(2, "fork error\n");
   }
-*/
+
   exit();
 }
 #endif

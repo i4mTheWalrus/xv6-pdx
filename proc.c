@@ -1082,38 +1082,43 @@ initFreeList(void) {
 
 #ifdef CS333_P2
 int
-filluprocs(uint max, struct uproc **uptable)
+filluprocs(uint max, struct uproc *uptable)
 {
   // Note that this function assumes uptable has already been allocated
   struct proc *p;
-  int i = 0, upnum = 0; // uptable index and total
+  int i = 0; // uptable index and total
 
   acquire(&ptable.lock);
 
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
   {
-    if(i < max && p)
+    if(i < max && p->state != UNUSED)
     {
+      if(p->parent == 0)
+        uptable[i].ppid = 1;
+      else
+        uptable[i].ppid = p->parent->pid;
+      uptable[i].pid = p->pid;
+      uptable[i].uid = p->uid;
+      uptable[i].gid = p->gid;
+      uptable[i].elapsed_ticks = ticks - p->start_ticks;
+      uptable[i].CPU_total_ticks = p->cpu_ticks_total;
+      uptable[i].size = p->sz;
+      safestrcpy(uptable[i].name, p->name, sizeof(p->name));
+
       switch(p->state) // check if this proc should be copied
       {
         case RUNNABLE:
+          safestrcpy(uptable[i].state, "EMBRYO", sizeof("EEMBRYO"));
+          break;
         case SLEEPING:
+          safestrcpy(uptable[i].state, "SLEEPING", sizeof("SLEEPING"));
+          break;
         case RUNNING:
-          uptable[i]->pid = p->pid;
-          uptable[i]->uid = p->uid;
-          uptable[i]->gid = p->gid;
-          strncpy(uptable[i]->name, p->name, sizeof(p->name));
-          strncpy(uptable[i]->state, states[p->state],
-                  sizeof(states[p->state])*2); // extra copy padding
-          // for ppid check parent existence
-          if(p->parent == 0)
-            uptable[i]->ppid = 1;
-          else
-            uptable[i]->ppid = p->parent->pid;
-          uptable[i]->elapsed_ticks = ticks - p->start_ticks;
-          uptable[i]->CPU_total_ticks = p->cpu_ticks_total;
-          uptable[i]->size = p->sz;
-          upnum++;
+          safestrcpy(uptable[i].state, "RUNNING", sizeof("RUNNING"));
+          break;
+        case ZOMBIE:
+          safestrcpy(uptable[i].state, "ZOMBIE", sizeof("ZOMBIE"));
           break;
         default:
           break;
@@ -1122,9 +1127,10 @@ filluprocs(uint max, struct uproc **uptable)
     }
   }
   release(&ptable.lock);
-  return upnum; // return number of uprocs copied into uptable
+  return i; // return number of uprocs copied into uptable
 }
 #endif
+
 #ifdef CS333_P3P4
 void
 readydump(void)

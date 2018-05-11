@@ -26,36 +26,26 @@ main(void)
   // malloc an array for the process table
   // fill the table with getprocs(max,uproc)
   // print stuff about the procs
-  uint max = MAX_UPROCS;
-  struct uproc **uptable = malloc(MAX_UPROCS * sizeof(struct uproc));
+  struct uproc *uptable = malloc(MAX_UPROCS * sizeof(struct uproc));
 
-  for(int i = 0; i < MAX_UPROCS; i++)
-  {
-    uptable[i] = malloc(sizeof(struct uproc));
-  }
+  int uprocnum = getprocs(MAX_UPROCS, uptable);
 
-  int uprocnum = getprocs(max, uptable);
   if(uprocnum <= 0)
     exit();
 
   // print a header
-  printf(1, "PID\tName\tUID\tGID\tPPID\tElapsed\tCPU\tState\tSize\n");
+  printf(1, "PID\tName\tUID\tGID\tPPID\tElapsed\tCPU\tState\t        Size\n");
 
   // print the uprocs
   for(int i = 0; i < uprocnum; i++)
   {
     printf(1, "%d\t%s\t%d\t%d\t%d\t",
-           uptable[i]->pid, uptable[i]->name, uptable[i]->uid,
-           uptable[i]->gid, uptable[i]->ppid);
-    printelapsed(uptable[i]->elapsed_ticks);
+           uptable[i].pid, uptable[i].name, uptable[i].uid,
+           uptable[i].gid, uptable[i].ppid);
+    printelapsed(uptable[i].elapsed_ticks);
     printf(1, "\t");
-    printelapsed(uptable[i]->CPU_total_ticks);
-    printf(1, "\t%s\t%d\t\n", uptable[i]->state, uptable[i]->size);
-  }
-
-  for(int i = 0; i < MAX_UPROCS; i++)
-  {
-    free(uptable[i]);
+    printelapsed(uptable[i].CPU_total_ticks);
+    printf(1, "\t%s        %d\t\n", uptable[i].state, uptable[i].size);
   }
 
   free(uptable);

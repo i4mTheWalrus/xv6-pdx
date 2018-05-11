@@ -82,7 +82,7 @@ struct proc {
 
 #ifdef CS333_P2
 #include "uproc.h"
-int filluprocs(uint max, struct uproc **uptable);
+int filluprocs(uint max, struct uproc *uptable);
 #endif
 
 #ifdef CS333_P3P4

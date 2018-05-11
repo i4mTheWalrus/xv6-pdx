@@ -3,7 +3,7 @@
 CS333_PROJECT ?= 3
 CS333_CFLAGS =
 CS333_UPROGS =
-CS333_TPROGS = _testfreelist _testkill _testzombie _testexit _testwait _testRR _testinterrupts
+CS333_TPROGS = _testfreelist _testkill _testzombie _testexit _testwait _testRR _testinterrupts _p2testsuite
 PRINT_SYSCALLS ?= 0
 
 ifeq ($(PRINT_SYSCALLS), 1)

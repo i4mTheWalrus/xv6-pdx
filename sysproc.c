@@ -134,8 +134,8 @@ sys_setuid(void)
   int id;
   if(argint(0, &id) < 0)
     return -1; // argint failed to fetch off the stack
-  if(id <= 0 || id > 32768)
-    return -1; // id is outside of acceptale range
+  if(id < 0 || id >= 32768)
+    return -1; // id is outside of acceptable range
   else
   {
     proc->uid = id;
@@ -149,7 +149,7 @@ sys_setgid(void)
   int id;
   if(argint(0, &id) < 0)
     return -1; // argint failed to fetch off the stack
-  if(id <= 0 || id > 32768)
+  if(id < 0 || id >= 32768)
     return -1; // id is outside of acceptale range
   else
   {
@@ -161,13 +161,14 @@ sys_setgid(void)
 int
 sys_getprocs(void)
 {
-  int max = 0;
-  struct uproc **p = 0;
-  if(argint(0, &max) < 0)
-    return -1;
-  if(argptr(1, (void*)&p, sizeof(p)) < 0)
-    return -1;
+  struct uproc *up;
+  int size;
 
-  return filluprocs((uint)max, p);
+  if(argint(0,&size) < 0 || argptr(1,(void*)&up, sizeof(*up)) < 0)
+  {
+    return -1;
+  }
+
+  return filluprocs(size, up);
 }
 #endif

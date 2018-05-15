@@ -1018,6 +1018,11 @@ stateListRemove(struct proc** head, struct proc** tail, struct proc* p)
 
   if (current == p) {
     *head = (*head)->next;
+    // prevent tail remaining assigned when we've removed the only item
+    // on the list
+    if(*tail == p){
+      *tail = 0;
+    }
     return 0;
   }
 

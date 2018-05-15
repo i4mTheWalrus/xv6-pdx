@@ -98,3 +98,4 @@ testRR.c
 testwait.c
 testzombie.c
 p2testsuite.c
+p4test.c

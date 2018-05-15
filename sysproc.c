@@ -164,7 +164,7 @@ sys_getprocs(void)
   struct uproc *up;
   int size;
 
-  if(argint(0,&size) < 0 || argptr(1,(void*)&up, sizeof(*up)) < 0)
+  if(argint(0,&size) < 0 || argptr(1,(void*)&up, sizeof(*up) * size) < 0)
   {
     return -1;
   }

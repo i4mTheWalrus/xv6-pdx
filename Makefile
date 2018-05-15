@@ -1,9 +1,9 @@
 # Set flag to correct CS333 project number: 1, 2, ...
 # 0 == original xv6-pdx distribution functionality
-CS333_PROJECT ?= 3
+CS333_PROJECT ?= 4
 CS333_CFLAGS =
 CS333_UPROGS =
-CS333_TPROGS = _testfreelist _testkill _testzombie _testexit _testwait _testRR _testinterrupts _p2testsuite
+CS333_TPROGS = _testsetpriority
 PRINT_SYSCALLS ?= 0
 
 ifeq ($(PRINT_SYSCALLS), 1)

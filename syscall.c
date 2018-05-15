@@ -110,6 +110,9 @@ extern int sys_setgid(void);
 extern int sys_getppid(void);
 extern int sys_getprocs(void);
 #endif
+#ifdef CS333_P3P4
+extern int sys_setpriority(void);
+#endif
 
 static int (*syscalls[])(void) = {
 [SYS_fork]     sys_fork,
@@ -145,6 +148,9 @@ static int (*syscalls[])(void) = {
 [SYS_getppid]  sys_getppid,
 [SYS_getprocs] sys_getprocs,
 #endif
+#ifdef CS333_P3P4
+[SYS_setpriority] sys_setpriority,
+#endif
 };
 
 // put data structure for printing out system call invocation information here
@@ -179,6 +185,7 @@ static char (*syscallnames[]) = {
 [SYS_setgid]   "setgid",
 [SYS_getppid]  "getppid",
 [SYS_getprocs] "getprocs",
+[SYS_setpriority], "setpriority",
 };
 #endif
 

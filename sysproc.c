@@ -172,3 +172,19 @@ sys_getprocs(void)
   return filluprocs(size, up);
 }
 #endif
+
+#ifdef CS333_P3P4
+int
+sys_setpriority(void)
+{
+  int prio = 0;
+
+  if(argint(0, &prio) < 0)
+    return -1;
+  if(prio < 0)  // Check for negative
+    return -1;
+
+  proc->priority = prio;
+  return 0;
+}
+#endif

@@ -8,6 +8,7 @@
 #include "spinlock.h"
 
 #ifdef CS333_P3P4
+//#define MAXPRIO 3
 struct StateLists {
   struct proc* ready;
   struct proc* readyTail;
@@ -147,6 +148,9 @@ found:
 #ifdef CS333_P2
   p->cpu_ticks_total = 0;
   p->cpu_ticks_in = 0;
+#endif
+#ifdef CS333_P3P4
+  p->priority = 0;
 #endif
 
   return p;
@@ -928,6 +932,7 @@ procdumpP3P4(struct proc *p, char *state)
     cprintf("1\t");
   else
     cprintf("%d\t", p->parent->pid);
+  cprintf("%d\t", p->priority);
   printelapsed(ticks - p->start_ticks);
   cprintf("%s\t", "");
   printelapsed(p->cpu_ticks_total);
@@ -1145,6 +1150,7 @@ readydump(void)
 {
   struct proc *p;
   p = ptable.pLists.ready;
+  cprintf("Ready processes\n");
   while(p) {
     cprintf("%d -> ", p->pid);
     p = p->next;
@@ -1159,6 +1165,7 @@ freedump(void)
   int count = 0;
   acquire(&ptable.lock);
   p = ptable.pLists.free;
+  cprintf("Free processes\n");
   while(p) {
     count++;
     p = p->next;
@@ -1173,6 +1180,7 @@ sleepingdump(void)
 {
   struct proc *p;
   p = ptable.pLists.sleep;
+  cprintf("Sleeping processes\n");
   while(p) {
     cprintf("%d -> ", p->pid);
     p = p->next;
@@ -1185,6 +1193,7 @@ zombiedump(void)
 {
   struct proc *p;
   p = ptable.pLists.zombie;
+  cprintf("Zombie processes\n");
   while(p) {
     cprintf("(%d, %d) -> ", p->pid, p->parent->pid);
     p = p->next;

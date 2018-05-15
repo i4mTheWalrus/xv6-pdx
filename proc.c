@@ -1094,10 +1094,10 @@ filluprocs(uint max, struct uproc *uptable)
   {
     if(i < max && p->state != UNUSED)
     {
-      if(p->parent == 0)
-        uptable[i].ppid = 1;
-      else
+      if(p->parent)
         uptable[i].ppid = p->parent->pid;
+      else
+        uptable[i].ppid = 1;
       uptable[i].pid = p->pid;
       uptable[i].uid = p->uid;
       uptable[i].gid = p->gid;
@@ -1108,8 +1108,11 @@ filluprocs(uint max, struct uproc *uptable)
 
       switch(p->state) // check if this proc should be copied
       {
+        case EMBRYO:
+          safestrcpy(uptable[i].state, "EMBRYO", sizeof("EMBRYO"));
+          break;
         case RUNNABLE:
-          safestrcpy(uptable[i].state, "EMBRYO", sizeof("EEMBRYO"));
+          safestrcpy(uptable[i].state, "RUNNABLE", sizeof("RUNNABLE"));
           break;
         case SLEEPING:
           safestrcpy(uptable[i].state, "SLEEPING", sizeof("SLEEPING"));

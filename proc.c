@@ -8,10 +8,9 @@
 #include "spinlock.h"
 
 #ifdef CS333_P3P4
-//#define MAXPRIO 3
 struct StateLists {
-  struct proc* ready;
-  struct proc* readyTail;
+  struct proc* ready[MAXPRIO + 1];
+  struct proc* readyTail[MAXPRIO + 1];
   struct proc* free;
   struct proc* freeTail;
   struct proc* sleep;
@@ -25,6 +24,7 @@ struct StateLists {
 };
 
 struct {
+  uint PromoteAtTime;
   struct spinlock lock;
   struct proc proc [NPROC];
   struct StateLists pLists;
@@ -150,7 +150,7 @@ found:
   p->cpu_ticks_in = 0;
 #endif
 #ifdef CS333_P3P4
-  p->priority = 0;
+  p->priority = 0;  // procs start at highest prio
 #endif
 
   return p;
@@ -168,6 +168,7 @@ userinit(void)
   acquire(&ptable.lock);
   initProcessLists();
   initFreeList();
+  ptable.PromoteAtTime = TIME_TO_PROMOTE;
   release(&ptable.lock);
 #endif
 
@@ -200,7 +201,7 @@ userinit(void)
   stateListRemove(&ptable.pLists.embryo, &ptable.pLists.embryoTail, p);
   p->state = RUNNABLE;
   p->next = 0;
-  stateListAdd(&ptable.pLists.ready, &ptable.pLists.readyTail, p);
+  stateListAdd(&ptable.pLists.ready[0], &ptable.pLists.readyTail[0], p);
   ptable.pLists.sleep = 0;
   ptable.pLists.sleepTail = 0;
   ptable.pLists.zombie = 0;
@@ -293,7 +294,8 @@ fork(void)
   assertState(np, EMBRYO);
   stateListRemove(&ptable.pLists.embryo, &ptable.pLists.embryoTail, np);
   np->state = RUNNABLE;
-  stateListAdd(&ptable.pLists.ready, &ptable.pLists.readyTail, np);
+  // Add to the highest priority queue
+  stateListAdd(&ptable.pLists.ready[0], &ptable.pLists.readyTail[0], np);
   release(&ptable.lock);
 #else
   acquire(&ptable.lock);
@@ -383,10 +385,21 @@ exit(void) // P3 exit ****************
     p = p->next;
   }
 
+/*
   p = ptable.pLists.ready;
   while(p) {
     if(p->parent == proc) p->parent = initproc;
     p = p->next;
+  }
+*/
+  for(int i = 0; i < MAXPRIO; i++)
+  {
+    p = ptable.pLists.ready[i];
+    while(p)
+    {
+      if(p->parent == proc) p->parent = initproc;
+      p = p->next;
+    }
   }
 
   p = ptable.pLists.embryo;
@@ -499,13 +512,27 @@ wait(void) // P3 wait **************************
     }
     // Look through other lists for children
     // (mirroring prior implementation)
-    p = ptable.pLists.ready;
+/*    p = ptable.pLists.ready;
     while(p) {
       if(p->parent == proc) {
         havekids = 1;
         goto nowait;
       }
       p = p->next;
+    }
+*/
+    for(int i = 0; i < MAXPRIO; i++)
+    {
+      p = ptable.pLists.ready[i];
+      while(p)
+      {
+        if(p->parent == proc)
+        {
+          havekids = 1;
+          goto nowait;
+        }
+        p = p->next;
+      }
     }
 
     p = ptable.pLists.sleep;
@@ -612,28 +639,38 @@ scheduler(void) // P3 scheduler ***************************
     // Enable interrupts on this processor.
     sti();
 
+
+    // CHECK TO SEE IF ITS TIME TO PROMOTE ALL BY 1
+
+
     idle = 1;  // assume idle unless we schedule a process
     acquire(&ptable.lock);
-    p = ptable.pLists.ready;
-    if(p) {
-      p->cpu_ticks_in = ticks;
 
-      // Switch to chosen process.  It is the process's job
-      // to release ptable.lock and then reacquire it
-      // before jumping back to us.
-      idle = 0;  // not idle this timeslice
-      proc = p;
-      switchuvm(p);
-      assertState(p, RUNNABLE);
-      stateListRemove(&ptable.pLists.ready, &ptable.pLists.readyTail, p);
-      p->state = RUNNING;
-      stateListAdd(&ptable.pLists.running, &ptable.pLists.runningTail, p);
-      swtch(&cpu->scheduler, proc->context);
-      switchkvm();
+    for(int i = 0; i < MAXPRIO; i++)
+    {
+      p = ptable.pLists.ready[i];
+      if(p) {
+        p->cpu_ticks_in = ticks;
 
-      // Process is done running for now.
-      // It should have changed its p->state before coming back.
-      proc = 0;
+        // Switch to chosen process.  It is the process's job
+        // to release ptable.lock and then reacquire it
+        // before jumping back to us.
+        idle = 0;  // not idle this timeslice
+        proc = p;
+        switchuvm(p);
+        assertState(p, RUNNABLE);
+        if(p->priority != i) // assert priority
+          panic("scheduling a proc eith incorrect priority!\n");
+        stateListRemove(&ptable.pLists.ready[p->priority], &ptable.pLists.readyTail[p->priority], p);
+        p->state = RUNNING;
+        stateListAdd(&ptable.pLists.running, &ptable.pLists.runningTail, p);
+        swtch(&cpu->scheduler, proc->context);
+        switchkvm();
+
+        // Process is done running for now.
+        // It should have changed its p->state before coming back.
+        proc = 0;
+      }
     }
     release(&ptable.lock);
     // if idle, wait for next interrupt
@@ -678,7 +715,7 @@ yield(void)
   assertState(proc, RUNNING);
   stateListRemove(&ptable.pLists.running, &ptable.pLists.runningTail, proc);
   proc->state = RUNNABLE;
-  stateListAdd(&ptable.pLists.ready, &ptable.pLists.readyTail, proc);
+  stateListAdd(&ptable.pLists.ready[proc->priority], &ptable.pLists.readyTail[proc->priority], proc);
   sched();
   release(&ptable.lock);
 #else
@@ -780,7 +817,7 @@ wakeup1(void *chan) // *********** P3 ***************
       assertState(p, SLEEPING);
       stateListRemove(&ptable.pLists.sleep, &ptable.pLists.sleepTail, p);
       p->state = RUNNABLE;
-      stateListAdd(&ptable.pLists.ready, &ptable.pLists.readyTail, p);
+      stateListAdd(&ptable.pLists.ready[p->priority], &ptable.pLists.readyTail[p->priority], p);
     }
     p = temp;
   }
@@ -834,7 +871,8 @@ kill(int pid) // ****** P3 ***********************
         assertState(p, SLEEPING);
         stateListRemove(&ptable.pLists.sleep, &ptable.pLists.sleepTail, p);
         p->state = RUNNABLE;
-        stateListAdd(&ptable.pLists.ready, &ptable.pLists.readyTail, p);
+        // put a killed proc at highest priority
+        stateListAdd(&ptable.pLists.ready[0], &ptable.pLists.readyTail[0], p);
         release(&ptable.lock);
         return 0;
       }
@@ -842,14 +880,18 @@ kill(int pid) // ****** P3 ***********************
     }
   }
 
-  if((p = ptable.pLists.ready)) {
-    while(p) {
-      if(p->pid == pid) {
-        p->killed = 1;
-        release(&ptable.lock);
-        return 0;
+
+  for(int i = 0; i < MAXPRIO; i++)
+  {
+    if((p = ptable.pLists.ready[i])) {
+      while(p) {
+        if(p->pid == pid) {
+          p->killed = 1;
+          release(&ptable.lock);
+          return 0;
+        }
+        p = p->next;
       }
-      p = p->next;
     }
   }
 
@@ -1061,8 +1103,11 @@ stateListRemove(struct proc** head, struct proc** tail, struct proc* p)
 
 static void
 initProcessLists(void) {
-  ptable.pLists.ready = 0;
-  ptable.pLists.readyTail = 0;
+  for(int i = 0; i < MAXPRIO; i++)
+  {
+    ptable.pLists.ready[i] = 0;
+    ptable.pLists.readyTail[i] = 0;
+  }
   ptable.pLists.free = 0;
   ptable.pLists.freeTail = 0;
   ptable.pLists.sleep = 0;
@@ -1149,13 +1194,17 @@ void
 readydump(void)
 {
   struct proc *p;
-  p = ptable.pLists.ready;
   cprintf("Ready processes\n");
-  while(p) {
-    cprintf("%d -> ", p->pid);
-    p = p->next;
+
+  for(int i = 0; i < MAXPRIO; i++)
+  {
+    p = ptable.pLists.ready[i];
+    while(p) {
+      cprintf("%d -> ", p->pid);
+      p = p->next;
+    }
+    cprintf("\n");
   }
-  cprintf("\n");
 }
 
 void

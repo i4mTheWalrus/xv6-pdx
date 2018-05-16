@@ -16,3 +16,7 @@
 #define STARTUID      0  // init process uid
 #define STARTGID      0  // init process gid
 #endif
+#ifdef CS333_P3P4
+#define TIME_TO_PROMOTE 500  // Hand tuned promotion time
+#define MAXPRIO           3  // number of priority queues
+#endif

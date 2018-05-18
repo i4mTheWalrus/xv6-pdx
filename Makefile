@@ -3,7 +3,7 @@
 CS333_PROJECT ?= 4
 CS333_CFLAGS =
 CS333_UPROGS =
-CS333_TPROGS = _testsp _p4test _p4test2 _testRR
+CS333_TPROGS = _tprom _p4test _p4test2 _testRR
 PRINT_SYSCALLS ?= 0
 
 ifeq ($(PRINT_SYSCALLS), 1)

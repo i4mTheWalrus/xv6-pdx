@@ -398,7 +398,7 @@ exit(void) // P3 exit ****************
   }
   }
 
-  for(int i = 0; i < MAXPRIO; i++)
+  for(int i = 0; i <= MAXPRIO; i++)
   {
     if((p = ptable.pLists.ready[i])) {
     while(p)
@@ -524,7 +524,7 @@ wait(void) // P3 wait **************************
 
     // Look through other lists for children
     // (mirroring prior implementation)
-    for(int i = 0; i < MAXPRIO; i++) {
+    for(int i = 0; i <= MAXPRIO; i++) {
       p = ptable.pLists.ready[i];
       while(p) {
         if(p->parent == proc) {
@@ -645,13 +645,13 @@ scheduler(void) // P3 scheduler ***************************
 
     idle = 1;  // assume idle unless we schedule a process
     acquire(&ptable.lock);
-/*
-    for(i = 0; i < MAXPRIO; i++){
+
+    for(i = 0; i <= MAXPRIO; i++){
       p = ptable.pLists.ready[i];
       if(p)
         break;
-    }*/
-    p = ptable.pLists.ready[0];
+    }
+    //p = ptable.pLists.ready[0];
     if(p) {
     //while(p) {
       p->cpu_ticks_in = ticks;
@@ -678,15 +678,11 @@ scheduler(void) // P3 scheduler ***************************
     //}
     }
 
-
-
-
-
 /*
     // CHECK IF ITS TIME TO PROMOTE
     if(ticks >= ptable.PromoteAtTime) {
       struct proc *np;
-      for(int i = 1; i < MAXPRIO; i++) { // skip queue 0 (highest queue)
+      for(int i = 1; i <= MAXPRIO; i++) { // skip queue 0 (highest queue)
         p = ptable.pLists.ready[i];
         while(p) {
           np = p->next;
@@ -927,7 +923,7 @@ kill(int pid) // ****** P3 ***********************
     }
   }
 
-  for(int i = 0; i < MAXPRIO; i++) {
+  for(int i = 0; i <= MAXPRIO; i++) {
     if((p = ptable.pLists.ready[i])) {
       while(p) {
         if(p->pid == pid) {
@@ -1148,7 +1144,7 @@ stateListRemove(struct proc** head, struct proc** tail, struct proc* p)
 
 static void
 initProcessLists(void) {
-  for(int i = 0; i < MAXPRIO; i++)
+  for(int i = 0; i <= MAXPRIO; i++)
   {
     ptable.pLists.ready[i] = 0;
     ptable.pLists.readyTail[i] = 0;
@@ -1242,7 +1238,7 @@ readydump(void)
   struct proc *p;
   cprintf("Ready processes:\n");
 
-  for(int i = 0; i < MAXPRIO; i++)
+  for(int i = 0; i <= MAXPRIO; i++)
   {
     cprintf("%d: ", i);
     p = ptable.pLists.ready[i];

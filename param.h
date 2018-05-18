@@ -17,7 +17,7 @@
 #define STARTGID      0  // init process gid
 #endif
 #ifdef CS333_P3P4
-#define BUDGET              357  // Budget for all queues
-#define TICKS_TO_PROMOTE   5111  // Hand tuned promotion time
+#define BUDGET             400  // Budget for all queues
+#define TICKS_TO_PROMOTE   90067565  // Hand tuned promotion time
 #define MAXPRIO               6  // lowest priority a proc can have
 #endif

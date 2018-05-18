@@ -181,10 +181,11 @@ sys_setpriority(void)
 
   if(argint(1, &prio) < 0)
     return -1;
-  if(prio < 0)  // Check for negative
+  if(prio < 0 || prio > MAXPRIO)  // Check bounds
     return -1;
 
   proc->priority = prio;
+  proc->budget = BUDGET;
   return 0;
 }
 #endif

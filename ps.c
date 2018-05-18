@@ -34,14 +34,14 @@ main(void)
     exit();
 
   // print a header
-  printf(1, "PID\tName\tUID\tGID\tPPID\tElapsed\tCPU\tState\t        Size\n");
+  printf(1, "PID\tName\tUID\tGID\tPPID\tPrio\tElapsed\tCPU\tState\t        Size\n");
 
   // print the uprocs
   for(int i = 0; i < uprocnum; i++)
   {
-    printf(1, "%d\t%s\t%d\t%d\t%d\t",
+    printf(1, "%d\t%s\t%d\t%d\t%d\t%d\t",
            uptable[i].pid, uptable[i].name, uptable[i].uid,
-           uptable[i].gid, uptable[i].ppid);
+           uptable[i].gid, uptable[i].ppid, uptable[i].priority);
     printelapsed(uptable[i].elapsed_ticks);
     printf(1, "\t");
     printelapsed(uptable[i].CPU_total_ticks);

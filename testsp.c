@@ -5,11 +5,20 @@
 int
 main(int argc, char *argv[])
 {
-  printf(1, "setting priority to 2\n");
-  setpriority(getpid(), 2);
-  sleep(5000);
-//  printf(1, "setting priority to 0\n");
-//  setpriority(getpid(), 0);
+
+  int pid;
+  pid = fork();
+  pid = fork();
+  if(pid > 0) {
+    // parent process
+    while(1) {};
+  } else if (pid == 0) {
+    // child proces
+    while(1) {};
+  } else {
+    printf(2, "fork error\n");
+  }
+
   exit();
 }
 #endif

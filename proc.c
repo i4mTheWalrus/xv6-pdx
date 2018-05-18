@@ -651,11 +651,9 @@ scheduler(void) // P3 scheduler ***************************
       if(p)
         break;
     }
-    //p = ptable.pLists.ready[0];
+
     if(p) {
-    //while(p) {
       p->cpu_ticks_in = ticks;
-//      np = p->next;
 
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
@@ -674,11 +672,8 @@ scheduler(void) // P3 scheduler ***************************
       // Process is done running for now.
       // It should have changed its p->state before coming back.
       proc = 0;
-//      p = np;
-    //}
     }
 
-/*
     // CHECK IF ITS TIME TO PROMOTE
     if(ticks >= ptable.PromoteAtTime) {
       struct proc *np;
@@ -696,7 +691,7 @@ scheduler(void) // P3 scheduler ***************************
       }
       ptable.PromoteAtTime = ticks + TICKS_TO_PROMOTE;
     }
-*/
+
     release(&ptable.lock);
     // if idle, wait for next interrupt
     if (idle) {

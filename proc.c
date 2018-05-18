@@ -677,10 +677,12 @@ scheduler(void) // P3 scheduler ***************************
     // CHECK IF ITS TIME TO PROMOTE
     if(ticks >= ptable.PromoteAtTime) {
       struct proc *np;
+      // Promote in the ready/runnable list
       for(int i = 1; i <= MAXPRIO; i++) { // skip queue 0 (highest queue)
         p = ptable.pLists.ready[i];
         while(p) {
           np = p->next;
+          assertState(p, RUNNABLE);
           assertPrio(p, i);
           stateListRemove(&ptable.pLists.ready[p->priority], &ptable.pLists.readyTail[p->priority], p);
           p->priority = p->priority - 1;
@@ -689,6 +691,27 @@ scheduler(void) // P3 scheduler ***************************
           p = np;
         }
       }
+
+      // Promote in the sleeping list
+      p = ptable.pLists.sleep;
+      while(p) {
+        if(p->priority > 0) {
+          p->priority = p->priority - 1;
+          p->budget = BUDGET;     // reset budget
+        }
+        p = p->next;
+      }
+
+      // Promote in the running list
+      p = ptable.pLists.running;
+      while(p) {
+        if(p->priority > 0) {
+          p->priority = p->priority - 1;
+          p->budget = BUDGET;     // reset budget
+        }
+        p = p->next;
+      }
+
       ptable.PromoteAtTime = ticks + TICKS_TO_PROMOTE;
     }
 

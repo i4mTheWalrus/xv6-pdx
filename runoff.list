@@ -90,12 +90,7 @@ p5-test.c
 p5-test.h
 testSched.c
 uproc.h
-testfreelist.c
-testexit.c
-testinterrupts.c
-testkill.c
 testRR.c
-testwait.c
-testzombie.c
-p2testsuite.c
+tprom.c
+testSP.c
 p4test.c

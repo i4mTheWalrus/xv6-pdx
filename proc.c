@@ -392,45 +392,45 @@ exit(void) // P3 exit ****************
 
   // Pass abandoned children to initproc
   if((p = ptable.pLists.running)) {
-  while(p) {
-    if(p->parent == proc) p->parent = initproc;
-    p = p->next;
-  }
+    while(p) {
+      if(p->parent == proc) p->parent = initproc;
+      p = p->next;
+    }
   }
 
   for(int i = 0; i <= MAXPRIO; i++)
   {
     if((p = ptable.pLists.ready[i])) {
-    while(p)
-    {
-      if(p->parent == proc) p->parent = initproc;
-      p = p->next;
-    }
+      while(p)
+      {
+        if(p->parent == proc) p->parent = initproc;
+        p = p->next;
+      }
     }
   }
 
   if((p = ptable.pLists.embryo)) {
-  while(p) {
-    if(p->parent == proc) p->parent = initproc;
-    p = p->next;
-  }
+    while(p) {
+      if(p->parent == proc) p->parent = initproc;
+      p = p->next;
+    }
   }
 
   if((p = ptable.pLists.zombie)) {
-  while(p) {
-    if(p->parent == proc) {
-      p->parent = initproc;
-      wakeup1(initproc);
+    while(p) {
+      if(p->parent == proc) {
+        p->parent = initproc;
+        wakeup1(initproc);
+      }
+      p = p->next;
     }
-    p = p->next;
-  }
   }
 
   if((p = ptable.pLists.sleep)) {
-  while(p) {
-    if(p->parent == proc) p->parent = initproc;
-    p = p->next;
-  }
+    while(p) {
+      if(p->parent == proc) p->parent = initproc;
+      p = p->next;
+    }
   }
 
   // Jump into the scheduler, never to return.
@@ -498,28 +498,28 @@ wait(void) // P3 wait **************************
     // Scan through table looking for zombie children.
     havekids = 0;
     if((p = ptable.pLists.zombie)) {
-    while(p) {
-      if(p->parent == proc) {
-        // Found one.
-        havekids = 1;
-        pid = p->pid;
-        kfree(p->kstack);
-        p->kstack = 0;
-        freevm(p->pgdir);
-        stateListRemove(&ptable.pLists.zombie, &ptable.pLists.zombieTail, p);
-        p->state = UNUSED;
-        stateListAdd(&ptable.pLists.free, &ptable.pLists.freeTail, p);
-        p->pid = 0;
-        p->parent = 0;
-        p->name[0] = 0;
-        p->killed = 0;
-        p->priority = 0;
-        release(&ptable.lock);
-        return pid;
-      }
+      while(p) {
+        if(p->parent == proc) {
+          // Found one.
+          havekids = 1;
+          pid = p->pid;
+          kfree(p->kstack);
+          p->kstack = 0;
+          freevm(p->pgdir);
+          stateListRemove(&ptable.pLists.zombie, &ptable.pLists.zombieTail, p);
+          p->state = UNUSED;
+          stateListAdd(&ptable.pLists.free, &ptable.pLists.freeTail, p);
+          p->pid = 0;
+          p->parent = 0;
+          p->name[0] = 0;
+          p->killed = 0;
+          p->priority = 0;
+          release(&ptable.lock);
+          return pid;
+        }
 
-      p = p->next;
-    }
+        p = p->next;
+      }
     }
 
     // Look through other lists for children
@@ -536,33 +536,33 @@ wait(void) // P3 wait **************************
     }
 
     if((p = ptable.pLists.sleep)){
-    while(p) {
-      if(p->parent == proc) {
-        havekids = 1;
-        goto nowait;
+      while(p) {
+        if(p->parent == proc) {
+          havekids = 1;
+          goto nowait;
+        }
+        p = p->next;
       }
-      p = p->next;
-    }
     }
 
     if((p = ptable.pLists.embryo)) {
-    while(p) {
-      if(p->parent == proc) {
-        havekids = 1;
-        goto nowait;
+      while(p) {
+        if(p->parent == proc) {
+          havekids = 1;
+          goto nowait;
+        }
+        p = p->next;
       }
-      p = p->next;
-    }
     }
 
     if((p = ptable.pLists.running)) {
-    while(p) {
-      if(p->parent == proc) {
-        havekids = 1;
-        goto nowait;
+      while(p) {
+        if(p->parent == proc) {
+          havekids = 1;
+          goto nowait;
+        }
+        p = p->next;
       }
-      p = p->next;
-    }
     }
 
 nowait:
@@ -1309,5 +1309,69 @@ zombiedump(void)
     p = p->next;
   }
   cprintf("\n");
+}
+
+int
+setpriohelper(int pid, int prio)
+{
+  struct proc *p;
+
+  // Lets look for this process!
+  if((p = ptable.pLists.running)) {
+    while(p) {
+      if(p->pid == pid) {
+        if(proc->priority != prio) {
+          proc->priority = prio;
+          proc->budget = BUDGET;
+        }
+        return 0;
+      }
+      p = p->next;
+    }
+  }
+
+  for(int i = 0; i <= MAXPRIO; i++) {
+    if((p = ptable.pLists.ready[i])) {
+      while(p) {
+        if(p->pid == pid) {
+          if(proc->priority != prio) {
+            proc->priority = prio;
+            proc->budget = BUDGET;
+          }
+          return 0;
+        }
+        p = p->next;
+      }
+    }
+  }
+
+  if((p = ptable.pLists.embryo)) {
+    while(p) {
+      if(p->pid == pid) {
+        if(proc->priority != prio) {
+          proc->priority = prio;
+          proc->budget = BUDGET;
+        }
+        return 0;
+      }
+      p = p->next;
+    }
+  }
+
+  if((p = ptable.pLists.sleep)) {
+    while(p) {
+      if(p->pid == pid) {
+        if(proc->priority != prio) {
+          proc->priority = prio;
+          proc->budget = BUDGET;
+        }
+        return 0;
+      }
+      p = p->next;
+    }
+  }
+
+  // that pid wasnt found!
+  return -1;
 }
 #endif

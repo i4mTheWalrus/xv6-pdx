@@ -177,15 +177,15 @@ sys_getprocs(void)
 int
 sys_setpriority(void)
 {
-  int prio = 0;
+  int prio = 0, pid = -1;
 
+  if(argint(0, &pid) < 0)
+    return -1;
   if(argint(1, &prio) < 0)
     return -1;
   if(prio < 0 || prio > MAXPRIO)  // Check bounds
     return -1;
 
-  proc->priority = prio;
-  proc->budget = BUDGET;
-  return 0;
+  return setpriohelper(pid, prio);
 }
 #endif
